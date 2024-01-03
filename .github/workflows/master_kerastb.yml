@@ -70,7 +70,7 @@ jobs:
           app-name: 'kerastb'
           slot-name: 'Production'
           package: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
-          scm-do-build-during-deployment: false  # Set to false since build already happened
+          scm-do-build-during-deployment: true  # Set to false since build already happened !No
           enable-oryx-build: true
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_79B26F10E10B435DA9CE7774385C9853 }}
           app-settings: |
