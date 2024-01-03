@@ -1,0 +1,36 @@
+{
+  "version": "2.0",
+  "logging": {
+    "applicationInsights": {
+      "samplingSettings": {
+        "isEnabled": true,
+        "excludedTypes": "Request"
+      }
+    }
+  },
+  "extensionBundle": {
+    "id": "Microsoft.Azure.Functions.ExtensionBundle",
+    "version": "[3.*, 4.0.0)"
+  },
+  "concurrency": {
+    "dynamicConcurrencyEnabled": true,
+    "snapshotPersistenceEnabled": true
+  },
+  "http": {
+    "routePrefix": "",
+    "cors": {
+      "allowedOrigins": [
+        "https://www.daviddasa.com"
+      ],
+      "allowedMethods": [
+        "GET",
+        "POST",
+        "PUT",
+        "DELETE"
+      ],
+      "allowedHeaders": [
+        "Content-Type"
+      ]
+    }
+  }
+}
