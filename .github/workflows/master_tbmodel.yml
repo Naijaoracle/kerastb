@@ -30,9 +30,6 @@ jobs:
         run: |
           python -m venv venv
           source venv/bin/activate
-          
-      - name: Upgrade pip
-        run: '/tmp/oryx/platforms/python/3.8.6/bin/python3.8 -m pip install --upgrade pip'
 
       - name: Install dependencies
         run: pip install -r requirements.txt
