@@ -1,7 +1,3 @@
-# Docs for the Azure Web Apps Deploy action: https://github.com/azure/functions-action
-# More GitHub Actions for Azure: https://github.com/Azure/actions
-# More info on Python, GitHub Actions, and Azure Functions: https://aka.ms/python-webapps-actions
-
 name: Build and deploy Python project to Azure Function App - tbmodel
 
 on:
@@ -30,7 +26,6 @@ jobs:
         run: |
           python -m venv venv
           source venv/bin/activate
-
       - name: Install dependencies
         run: pip install -r requirements.txt
 
@@ -59,6 +54,13 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: python-app
+
+      - name: Debug Info
+        run: |
+          echo "Contents of release.zip:"
+          unzip -l release.zip
+          echo "Azure Publish Profile:"
+          echo ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_743655214B0A42BDBDA1AC8FD71D501A }}
 
       - name: Unzip artifact for deployment
         run: unzip release.zip
