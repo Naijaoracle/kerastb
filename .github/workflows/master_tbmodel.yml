@@ -30,41 +30,38 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      # Optional: Add step to run tests here
-
       - name: Zip artifact for deployment
-        run: zip release.zip ./* -r
+        run: zip -r release.zip .
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v3
         with:
           name: python-app
-          path: |
-            release.zip
-            !venv/
+          path: release.zip
+
   deploy:
     runs-on: ubuntu-latest
     needs: build
     environment:
       name: 'Production'
       url: ${{ steps.deploy-to-function.outputs.webapp-url }}
-  
+
     steps:
       - name: Download artifact from build job
         uses: actions/download-artifact@v3
         with:
           name: python-app
-  
+
       - name: Debug Info
         run: |
           echo "Contents of release.zip:"
           unzip -l release.zip
           echo "Azure Publish Profile:"
           echo ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_743655214B0A42BDBDA1AC8FD71D501A }}
-  
+
       - name: Unzip artifact for deployment
         run: unzip release.zip
-  
+
       - name: 'Deploy to Azure Functions'
         uses: Azure/functions-action@v2
         id: deploy-to-function
