@@ -41,21 +41,20 @@ def create_model():
 
 def load_environment_variables_from_keyvault():
     try:
-        # Use Azure SDK to retrieve secrets from Azure Key Vault
-        # Replace 'keyvault_url', 'client_id', 'client_secret', 'secret_name_1', etc. with your specific values
-        # Follow Azure SDK documentation for Azure Key Vault to retrieve secrets
-        # Example:
-        # from azure.identity import DefaultAzureCredential
-        # from azure.keyvault.secrets import SecretClient
-        # credential = DefaultAzureCredential()
-        # secret_client = SecretClient(vault_url='your_keyvault_url', credential=credential)
-        # azure_storage_connection_string = secret_client.get_secret('your_storage_connection_string_secret_name').value
-        # container_name = secret_client.get_secret('your_container_name_secret_name').value
-        # blob_name = secret_client.get_secret('your_blob_name_secret_name').value
+        from azure.identity import DefaultAzureCredential
+        from azure.keyvault.secrets import SecretClient
 
-        azure_storage_connection_string = "your_storage_connection_string_from_keyvault"
-        container_name = "your_container_name_from_keyvault"
-        blob_name = "your_blob_name_from_keyvault"
+        # Authenticate to your Azure Key Vault using DefaultAzureCredential
+        credential = DefaultAzureCredential()
+
+        # Replace 'your-key-vault-url' with the URL of your Azure Key Vault
+        keyvault_url = "https://kerastbkeys.vault.azure.net/"
+        secret_client = SecretClient(vault_url=keyvault_url, credential=credential)
+
+        # Retrieve secrets from Azure Key Vault
+        azure_storage_connection_string = secret_client.get_secret("ConnectionString").value
+        container_name = secret_client.get_secret("Container").value
+        blob_name = secret_client.get_secret("BlobURL").value
 
         return azure_storage_connection_string, container_name, blob_name
     except Exception as e:
@@ -64,24 +63,39 @@ def load_environment_variables_from_keyvault():
 
 
 
+
 def load_model_weights_from_blob(container_name, blob_name):
-
     try:
-        # Retrieve the blob container URL from environment variables
-        blob_container_url = os.environ.get('BLOB_CONTAINER_URL')
+        from azure.identity import DefaultAzureCredential
+        from azure.storage.blob import BlobServiceClient
 
-        if not blob_container_url:
-            return func.HttpResponse("Blob Container URL not found in environment variables.", status_code=500)
+        # Authenticate to your Azure Key Vault using DefaultAzureCredential
+        credential = DefaultAzureCredential()
 
-        # Create a BlobClient using the blob container URL
-        blob_client = BlobClient.from_blob_url(blob_container_url)
+        # Replace 'your-key-vault-url' with the URL of your Azure Key Vault
+        keyvault_url = "https://kerastbkeys.vault.azure.net/"
+        secret_client = SecretClient(vault_url=keyvault_url, credential=credential)
+
+        # Retrieve secrets from Azure Key Vault
+        blob_url = secret_client.get_secret("BlobURL").value
+        sas_token = secret_client.get_secret("SAS").value
+
+        # Construct the Blob URL with SAS token
+        blob_url_with_sas = f"{blob_url}{sas_token}"
+
+        # Create BlobServiceClient using the constructed Blob URL with SAS token
+        blob_service_client = BlobServiceClient(account_url=blob_url_with_sas)
+
+        # Get the Blob Client for the specified container and blob name
+        blob_client = blob_service_client.get_blob_client(container=container_name, blob=blob_name)
 
         # Check if 'imageFile' exists in the request
         if 'imageFile' in req.files:
             image_file = req.files['imageFile'][0]
 
             # Upload the file to the Blob Storage container
-            blob_client.upload_blob(name=image_file.filename, data=image_file.stream())
+            with open(image_file.filename, "rb") as data:
+                blob_client.upload_blob(data)
 
             return func.HttpResponse("File uploaded successfully.")
         else:
